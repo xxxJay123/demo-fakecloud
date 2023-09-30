@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+    <script>
+        function registerUser() {
+            var userName = document.getElementById("userName").value;
+            var userPassword = document.getElementById("userPassword").value;
+            var userEmail = document.getElementById("userEmail").value;
+
+            var user = {
+                userName: userName,
+                userPassword: userPassword,
+                userEmail: userEmail
+            };
+
+            // Perform an AJAX request to send the user data to the server
+            // You can use libraries like Axios or fetch API for this purpose
+
+            // Example using fetch API:
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response from the server, for example, show a success message or redirect to another page
+                console.log(data);
+                // Redirect to a success page or show a success message to the user
+            })
+            .catch(error => {
+                // Handle errors, for example, show an error message to the user
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>User Registration</h1>
+    <form>
+        <label for="userName">Username:</label>
+        <input type="text" id="userName" name="userName" required><br><br>
+
+        <label for="userPassword">Password:</label>
+        <input type="password" id="userPassword" name="userPassword" required><br><br>
+
+        <label for="userEmail">Email:</label>
+        <input type="email" id="userEmail" name="userEmail" required><br><br>
+
+        <button type="button" onclick="registerUser()">Register</button>
+    </form>
+</body>
+</html>
