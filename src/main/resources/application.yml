@@ -56,6 +56,9 @@ logging:
       type:
         descriptor: TRACE
     blog: WARN
+    springframework: 
+      security: DEBUG
+
 
 
 jwt:

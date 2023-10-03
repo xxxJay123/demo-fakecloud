@@ -1,5 +1,7 @@
 package com.example.demofakecloud.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,4 +22,8 @@ public class UserFile {
   private String fileName;
   private String fileType;
   private byte[] data;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id")  
+  private User user;
 }

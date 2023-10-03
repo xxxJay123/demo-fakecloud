@@ -1,7 +1,10 @@
 package com.example.demofakecloud.entity;
 
+
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -20,7 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @IsPasswordsMatching
-public class User implements UserDetails/* , PasswordConfirmable */ {
+public class User implements UserDetails {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,13 +34,17 @@ public class User implements UserDetails/* , PasswordConfirmable */ {
   private String userPassword;
   private String userEmail;
 
+  @ManyToMany(mappedBy = "users", cascade = CascadeType.ALL)
+  private List<Role> roles = new ArrayList<>();
 
-  private String authToken;// Token used for authentication
+  @OneToMany(mappedBy = "user")
+  private List<UserFile> files;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    // In this example, the user has a single role: "ROLE_USER"
-    return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+    return roles.stream()
+        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -48,9 +56,6 @@ public class User implements UserDetails/* , PasswordConfirmable */ {
   public String getUsername() {
     return userName;
   }
-
-
-  // Below methods are set to true for simplicity; you can customize them based on your requirements.
 
   @Override
   public boolean isAccountNonExpired() {
@@ -71,5 +76,7 @@ public class User implements UserDetails/* , PasswordConfirmable */ {
   public boolean isEnabled() {
     return true;
   }
+
+
 }
 

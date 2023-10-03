@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import com.example.demofakecloud.customValidation.IsPasswordsMatching;
 import com.example.demofakecloud.entity.User;
 import com.example.demofakecloud.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import redis.clients.jedis.Jedis;
 
 @Service
 @IsPasswordsMatching
+@RequiredArgsConstructor
 public class UserService {
   @Autowired
   private final UserRepository userRepository;
@@ -21,34 +23,23 @@ public class UserService {
   @Autowired
   private final Jedis jedis;
 
-  public UserService(UserRepository userRepository,
-      PasswordEncoder passwordEncoder, Jedis jedis) {
-    this.userRepository = userRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.jedis = jedis;
-  }
 
+/* 
   public User registerUser(User user) {
+    // Hash the user password before saving it to the database
+    user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
+
     // Generate a unique token for the user
     String token = jwtTokenService.generateToken(user);
-    user.setAuthToken(token);
+  
     // Store the user in the database
     userRepository.save(user);
+
     // Store the token in Redis with the username as the key
-    jedis.set(user.getUsername(), token);
-    // Store the user in the database
+    jedis.set(user.getUserName(), token);
+
     return user;
-  }
-
-
-
-  public User findUserByUsername(String username) {
-    return userRepository.findByUserName(username);
-  }
-
-  public User findUserByAuthToken(String authToken) {
-    return userRepository.findByAuthToken(authToken);
-  }
+  } */
 
   public boolean isValidUser(String username, String password) {
     User user = findUserByUsername(username);
@@ -56,5 +47,7 @@ public class UserService {
         && passwordEncoder.matches(password, user.getUserPassword());
   }
 
-
+  public User findUserByUsername(String username) {
+    return userRepository.findByUserName(username);
+  }
 }

@@ -1,86 +1,50 @@
 package com.example.demofakecloud.service;
 
-import java.util.Date;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-/* import org.springframework.security.core.userdetails.UserDetails; */
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import com.example.demofakecloud.entity.User;
-import redis.clients.jedis.Jedis;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
 import java.security.Key;
-
+import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class JwtTokenService {
-
-  @Value("${jwt.secret}")
-  private final String secret;
+  
   @Value("${jwt.expiration}")
-  private final Long expiration;
+  private Long jwtExpiration;
 
-  @Autowired
-  private final Jedis jedis;
+  private final Key key; // Your secret key, possibly injected via constructor
 
 
-  public JwtTokenService(@Value("${jwt.secret}") String secret,
-      @Value("${jwt.expiration}") Long expiration, Jedis jedis) {
-    this.secret = secret;
-    this.expiration = expiration;
-    this.jedis = jedis;
-  }
+  public String generateToken(Authentication authentication) {
+    String username = authentication.getName();
+    Date currentDate = new Date();
+    Date expireDate = new Date(currentDate.getTime() + jwtExpiration);
 
-  public String generateToken(User user) {
-    Key key = Keys.hmacShaKeyFor(secret.getBytes());
-    String token = Jwts.builder()//
-        .setSubject(user.getUsername())//
-        .setExpiration(new Date(System.currentTimeMillis() + expiration))//
-        .signWith(key)//
-        .compact();//
-
-    // Store the token in Redis with the username as the key
-    jedis.set(user.getUsername(), token);
+    String token = Jwts.builder().setSubject(username).setIssuedAt(new Date())
+        .setExpiration(expireDate).signWith(key, SignatureAlgorithm.HS512)
+        .compact();
 
     return token;
   }
 
+  public String getUsernameFromJWT(String token) {
+    Claims claims = Jwts.parserBuilder().setSigningKey(key).build()
+        .parseClaimsJws(token).getBody();
 
-  public Date extractExpirationDate(String token) {
-    return extractClaims(token).getExpiration();
+    return claims.getSubject();
   }
 
-
-  public String extractUsername(String token) {
-    return Jwts.parserBuilder()//
-        .setSigningKey(secret.getBytes())//
-        .build()///
-        .parseClaimsJws(token)//
-        .getBody()//
-        .getSubject();//
+  public boolean isTokenValid(String token) {
+    try {
+      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+      return true;
+    } catch (Exception ex) {
+      return false;
+    }
   }
-
-  public boolean isTokenExpired(String token) {
-    return Jwts.parserBuilder()//
-        .setSigningKey(secret.getBytes())//
-        .build()//
-        .parseClaimsJws(token)//
-        .getBody()//
-        .getExpiration()//
-        .before(new Date());//
-  }
-
-  private Claims extractClaims(String token) {
-
-    return Jwts.parserBuilder()//
-        .setSigningKey(secret.getBytes())//
-        .build()//
-        .parseClaimsJws(token)//
-        .getBody();//
-
-  }
-
-
 }
