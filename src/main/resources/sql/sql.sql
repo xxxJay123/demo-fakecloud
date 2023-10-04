@@ -1,11 +1,11 @@
 -- Insert User Role
-INSERT INTO roles (name) VALUES ('USER');
+INSERT INTO role (name) VALUES ('USER');
 
 -- Insert Admin Role
-INSERT INTO roles (name) VALUES ('ADMIN');
+INSERT INTO role (name) VALUES ('ADMIN');
 
 
-select * from roles;
+select * from role;
 select * from users;
 
 SELECT * FROM roles WHERE name ILIKE 'user';

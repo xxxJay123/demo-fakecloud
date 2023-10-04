@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.example.demofakecloud.entity.User;
 import com.example.demofakecloud.entity.Impl.CustomUserDetails;
 import com.example.demofakecloud.repository.UserRepository;
+import com.example.demofakecloud.utils.JWTGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 
@@ -16,18 +17,34 @@ import org.springframework.security.core.Authentication;
 @RequiredArgsConstructor
 public class AuthenticationService implements UserDetailsService {
   @Autowired
-  private final JwtTokenService jwtTokenService;
+  private final JWTGenerator jwtTokenService;
   @Autowired
   private final UserRepository userRepository;
 
+  // @Override
+  // public UserDetails loadUserByUsername(String username)
+  // throws UsernameNotFoundException {
+  // User user = userRepository.findByUserName(username);
+  // Authentication authentication = new UsernamePasswordAuthenticationToken(
+  // user, null, user.getAuthorities());
+
+
+  // String token = jwtTokenService.generateToken(authentication);
+  // return new CustomUserDetails(user, token);
+
+  // }
   @Override
   public UserDetails loadUserByUsername(String username)
       throws UsernameNotFoundException {
     User user = userRepository.findByUserName(username);
+    if (user == null) {
+      throw new UsernameNotFoundException(
+          "User not found with username: " + username);
+    }
     Authentication authentication = new UsernamePasswordAuthenticationToken(
         user, null, user.getAuthorities());
+
     String token = jwtTokenService.generateToken(authentication);
     return new CustomUserDetails(user, token);
-
   }
 }

@@ -1,5 +1,6 @@
 package com.example.demofakecloud.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 // import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.security.config.Customizer.withDefaults;
 import java.security.Key;
-import javax.crypto.spec.SecretKeySpec;
+
 import com.example.demofakecloud.utils.JWTAuthenticationFilter;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+  @Autowired
+  private JwtAuthEntryPoint authEntryPoint;
 
   @Value("${jwt.secret}")
   private String secretKey;
@@ -36,9 +39,11 @@ public class SecurityConfig {
       "/configuration/security", //
       "/swagger-ui/**", //
       "/webjars/**", //
-      "/swagger-ui.html",//
+      "/swagger-ui.html", //
       "/api/auth/**",
-  };//
+      "/api/files/upload"
+  
+      ,};//
 
   // @Autowired
   // private JwtAuthEntryPoint authEntryPoint;
@@ -76,9 +81,9 @@ public class SecurityConfig {
     return new JWTAuthenticationFilter();
   }
 
-  @Bean
+/*   @Bean
   Key secretKey() {
     return new SecretKeySpec(secretKey.getBytes(),
         SignatureAlgorithm.HS256.getJcaName());
-  }
+  } */
 }

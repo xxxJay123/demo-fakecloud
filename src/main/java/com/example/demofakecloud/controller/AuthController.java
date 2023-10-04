@@ -2,6 +2,7 @@ package com.example.demofakecloud.controller;
 
 import java.util.Collections;
 import java.util.Optional;
+import javax.management.relation.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,7 @@ import com.example.demofakecloud.model.dto.LoginDTO;
 import com.example.demofakecloud.model.dto.RegisterDTO;
 import com.example.demofakecloud.repository.RoleRepository;
 import com.example.demofakecloud.repository.UserRepository;
+import com.example.demofakecloud.service.UserService;
 import com.example.demofakecloud.utils.JWTGenerator;
 import org.springframework.security.core.AuthenticationException;
 
@@ -37,6 +40,8 @@ public class AuthController {
   @Autowired
   private AuthenticationManager authenticationManager;
   @Autowired
+  private UserService userService;
+  @Autowired
   private UserRepository userRepository;
   @Autowired
   private RoleRepository roleRepository;
@@ -45,18 +50,18 @@ public class AuthController {
   @Autowired
   private JWTGenerator jwtGenerator;
 
+
+
   @PostMapping("/register")
   public ResponseEntity<String> register(@RequestBody RegisterDTO registerDto) {
     if (userRepository.existsByUserName(registerDto.getUserName())) {
       return new ResponseEntity<>("Username is taken!", HttpStatus.BAD_REQUEST);
     }
-
     User user = new User();
     user.setUserName(registerDto.getUserName());
     user.setUserPassword(
         passwordEncoder.encode((registerDto.getUserPassword())));
     user.setUserEmail(registerDto.getUserEmail());
-
     Optional<Role> optionalRole = roleRepository.findById(1L);
     if (optionalRole.isPresent()) {
       Role role = optionalRole.get();
@@ -64,14 +69,12 @@ public class AuthController {
     } else {
       return new ResponseEntity<>("Role not found!", HttpStatus.BAD_REQUEST);
     }
-
     userRepository.save(user);
-
     return new ResponseEntity<>("User registered success!", HttpStatus.OK);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<String> login(@RequestBody LoginDTO loginDto) {
+  public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO loginDto) {
 
     // Find user by username
     User user = userRepository.findByUserName(loginDto.getUserName());
@@ -86,13 +89,21 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    // Generate JWT token
-    Authentication authentication = new UsernamePasswordAuthenticationToken(
-        user, null, user.getAuthorities());
-    String token = jwtGenerator.generateToken(authentication);
+    // Authenticate the user
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(loginDto.getUserName(),
+            loginDto.getUserPassword()));
 
+    // If authentication successful, generate JWT token
+    if (authentication.isAuthenticated()) {
 
-    return ResponseEntity.ok(token);
+      String token = jwtGenerator.generateToken(authentication);
+      log.info("Token: {}", token);
+      return ResponseEntity.ok(new AuthResponseDTO(token));
+    } else {
+      // If authentication fails, return unauthorized response
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 
   }
 
