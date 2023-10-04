@@ -19,11 +19,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
@@ -33,7 +36,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(HttpServletRequest request,
-      HttpServletResponse response, FilterChain filterChain)
+      HttpServletResponse response, //
+      FilterChain filterChain)//
       throws ServletException, IOException {
     String token = getJWTFromRequest(request);
     if (StringUtils.hasText(token) && tokenGenerator.validateTokens(token)) {
@@ -41,14 +45,31 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
       UserDetails userDetails =
           customUserDetailsService.loadUserByUsername(username);
-      UsernamePasswordAuthenticationToken authenticationToken =
-          new UsernamePasswordAuthenticationToken(userDetails, null,
-              userDetails.getAuthorities());
-      authenticationToken.setDetails(
-          new WebAuthenticationDetailsSource().buildDetails(request));
-      SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+      if (userDetails != null) {
+        log.info("User authenticated in Filter: {}", userDetails.getUsername());
+        UsernamePasswordAuthenticationToken authenticationToken =
+            new UsernamePasswordAuthenticationToken(userDetails, null,
+                userDetails.getAuthorities());
+        authenticationToken.setDetails(
+            new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext()
+            .setAuthentication(authenticationToken);
+        log.info("UsernamePasswordAuthenticationToken: {}",
+            authenticationToken);
+
+        // Proceed with the request after authentication
+        filterChain.doFilter(request, response);
+        log.info("Proceed with the request after authentication");
+      } else {
+        log.warn("User details not found for username: {}", username);
+        // Handle unauthorized access
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      }
+    } else {
+      log.warn("Invalid or expired token");
+      // Handle unauthorized access
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
-    filterChain.doFilter(request, response);
   }
 
 

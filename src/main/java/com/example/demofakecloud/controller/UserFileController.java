@@ -16,7 +16,7 @@ import com.example.demofakecloud.entity.User;
 import com.example.demofakecloud.entity.UserFile;
 import com.example.demofakecloud.entity.Impl.CustomUserDetails;
 import com.example.demofakecloud.repository.UserRepository;
-import com.example.demofakecloud.service.FilesStorageService;
+
 import com.example.demofakecloud.service.UserFileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,51 +32,62 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class UserFileController {
     @Autowired
-    private FilesStorageService storageService;
+    private UserFileService storageService;
     @Autowired
     private final UserRepository userRepository;
 
-    public static String UPLOAD_DIRECTORY =
-            System.getProperty("user.dir") + "/uploads";
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        log.info("file in controller: {}" + file.toString());
+        log.info("file in controller: {}", file.toString());
 
         if (userDetails == null) {
-
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("User not authenticated.");
         }
-        log.info("user in controller: {}" + userDetails.toString());
         try {
-            String fileName = storageService.save(file, userDetails);
+            byte[] data = file.getBytes();
+            String fileType = file.getContentType();
+            String fileName = file.getOriginalFilename();
+            User user = userRepository.findById(userDetails.getUser().getId())
+                    .orElse(null);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("User not found.");
+            }
+
+            storageService.storeFile(file, fileName, fileType, data, user);
+
+            log.info("File saved in DB: {}", fileName);
             return ResponseEntity.ok("File uploaded successfully: " + fileName);
         } catch (Exception e) {
+            log.error("Failed to upload the file: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to upload the file: " + e.getMessage());
         }
     }
 
-    @PostMapping("/download")
-    public ResponseEntity<Resource> downloadFile(
-            @RequestParam("filename") String fileName,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
-        Resource file =
-                storageService.load(fileName, userDetails.getUser().getId());
-        if (file.exists() && file.isReadable()) {
-            return ResponseEntity.ok(file);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
+    // @PostMapping("/download")
+    // public ResponseEntity<Resource> downloadFile(
+    //         @RequestParam("filename") String fileName,
+    //         @AuthenticationPrincipal CustomUserDetails userDetails) {
+    //     if (userDetails == null) {
+    //         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    //     }
+
+    //     Resource file =
+    //             storageService.load(fileName, userDetails.getUser().getId());
+    //     if (file.exists() && file.isReadable()) {
+    //         return ResponseEntity.ok(file);
+    //     } else {
+    //         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    //     }
+    // }
     // @PostMapping("/upload")
     // public ResponseEntity<String> handleFileUpload(
     // @RequestParam("file") MultipartFile file,

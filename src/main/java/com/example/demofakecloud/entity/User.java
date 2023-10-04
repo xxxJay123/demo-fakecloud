@@ -34,7 +34,8 @@ public class User implements UserDetails {
   private String userPassword;
   private String userEmail;
 
-  @ManyToMany(mappedBy = "users", cascade = CascadeType.ALL)
+  @ManyToMany(mappedBy = "users", cascade = CascadeType.ALL,
+      fetch = FetchType.EAGER)
   private List<Role> roles = new ArrayList<>();
 
   @OneToMany(mappedBy = "user")

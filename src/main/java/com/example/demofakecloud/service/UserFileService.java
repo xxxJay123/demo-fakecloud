@@ -3,10 +3,13 @@ package com.example.demofakecloud.service;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import com.example.demofakecloud.entity.User;
 import com.example.demofakecloud.entity.UserFile;
 import com.example.demofakecloud.entity.Impl.CustomUserDetails;
 import com.example.demofakecloud.repository.UserFileRepository;
+import io.jsonwebtoken.io.IOException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserFileService {
@@ -34,15 +37,16 @@ public class UserFileService {
     return userFileRepository.findByUser(user);
   }
 
-  public void saveFileMetadata(CustomUserDetails user, String fileName,
-      String fileType) {
-    // Create a new UserFile entity and set its properties
+  @Transactional
+  public UserFile storeFile(MultipartFile file, String fileName,
+      String fileType, byte[] data, User user) throws IOException {
     UserFile userFile = new UserFile();
-    userFile.setUser(user.getUser());
     userFile.setFileName(fileName);
     userFile.setFileType(fileType);
+    userFile.setData(data);
+    userFile.setUser(user);
 
-    // Save the user file metadata to the database
-    userFileRepository.save(userFile);
+    // Save file metadata to the database
+    return userFileRepository.save(userFile);
   }
 }
