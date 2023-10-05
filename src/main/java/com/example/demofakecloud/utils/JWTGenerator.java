@@ -29,6 +29,7 @@ public class JWTGenerator {
 
     private final Key secretKey;
     private final long expiration;
+     private final Set<String> tokenBlacklist = new HashSet<>();
 
     public JWTGenerator(@Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration}") long expiration) {
@@ -96,5 +97,10 @@ public class JWTGenerator {
         return new Date(createdDate.getTime() + expiration);
     }
 
-
+    public boolean isTokenBlacklisted(String token) {
+        return tokenBlacklist.contains(token);
+    }
+    public void addToBlacklist(String token) {
+        tokenBlacklist.add(token);
+    }
 }

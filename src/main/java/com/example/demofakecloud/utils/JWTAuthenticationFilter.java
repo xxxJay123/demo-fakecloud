@@ -29,7 +29,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-//@Order(Ordered.HIGHEST_PRECEDENCE)
+// @Order(Ordered.HIGHEST_PRECEDENCE)
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
   private JWTGenerator tokenGenerator;
@@ -48,7 +48,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
     String token = getJWTFromRequest(request);
-    if (StringUtils.hasText(token) && tokenGenerator.validateTokens(token)) {
+    if (StringUtils.hasText(token) && tokenGenerator.validateTokens(token)
+        && tokenGenerator.isTokenBlacklisted(token)) {
       String username = tokenGenerator.getUsernameFromToken(token);
 
       UserDetails userDetails =
@@ -108,7 +109,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
   // }
   // chain.doFilter(req, res);
   // }
-  private String getJWTFromRequest(HttpServletRequest request) {
+  public String getJWTFromRequest(HttpServletRequest request) {
     String bearerToken = request.getHeader("Authorization");
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
       return bearerToken.substring(7, bearerToken.length());

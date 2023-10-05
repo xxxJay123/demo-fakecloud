@@ -25,7 +25,10 @@ import com.example.demofakecloud.model.dto.RegisterDTO;
 import com.example.demofakecloud.repository.RoleRepository;
 import com.example.demofakecloud.repository.UserRepository;
 import com.example.demofakecloud.service.UserService;
+import com.example.demofakecloud.utils.JWTAuthenticationFilter;
 import com.example.demofakecloud.utils.JWTGenerator;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
 
 import lombok.RequiredArgsConstructor;
@@ -49,7 +52,8 @@ public class AuthController {
   private PasswordEncoder passwordEncoder;
   @Autowired
   private JWTGenerator jwtGenerator;
-
+  @Autowired
+  private JWTAuthenticationFilter jwtFiler;
 
 
   @PostMapping("/register")
@@ -123,6 +127,18 @@ public class AuthController {
 
   }
 
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout(HttpServletRequest request,
+      HttpServletResponse response) {
+    try {
+      String token = jwtFiler.getJWTFromRequest(request);
+      jwtGenerator.addToBlacklist(token);
+      return ResponseEntity.ok("Logged out successfully!");
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to log out: " + e.getMessage());
+    }
+  }
   // @PostMapping("/login")
   // public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO loginDto) {
   // log.info("Attempting login for user: {}", loginDto.getUserName());
