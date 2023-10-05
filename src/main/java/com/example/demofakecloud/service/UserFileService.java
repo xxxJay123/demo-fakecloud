@@ -1,5 +1,6 @@
 package com.example.demofakecloud.service;
 
+import java.sql.Blob;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class UserFileService {
 
   @Transactional
   public UserFile storeFile(MultipartFile file, String fileName,
-      String fileType, byte[] data, User user) throws IOException {
+      String fileType, Blob data, User user) throws IOException {
     UserFile userFile = new UserFile();
     userFile.setFileName(fileName);
     userFile.setFileType(fileType);

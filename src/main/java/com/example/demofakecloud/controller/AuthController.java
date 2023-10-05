@@ -54,23 +54,39 @@ public class AuthController {
 
   @PostMapping("/register")
   public ResponseEntity<String> register(@RequestBody RegisterDTO registerDto) {
-    if (userRepository.existsByUserName(registerDto.getUserName())) {
-      return new ResponseEntity<>("Username is taken!", HttpStatus.BAD_REQUEST);
-    }
-    User user = new User();
-    user.setUserName(registerDto.getUserName());
-    user.setUserPassword(
-        passwordEncoder.encode((registerDto.getUserPassword())));
-    user.setUserEmail(registerDto.getUserEmail());
-    Optional<Role> optionalRole = roleRepository.findById(1L);
-    if (optionalRole.isPresent()) {
-      Role role = optionalRole.get();
+    try {
+      // Check if the username already exists
+      if (userRepository.existsByUserName(registerDto.getUserName())) {
+        return ResponseEntity.badRequest().body("Username is taken!");
+      }
+
+      // Check if the role 'USER' exists in the database
+      Optional<Role> optionalRole = roleRepository.findByName("USER");
+      Role role = optionalRole.orElseGet(() -> {
+        Role newRole = new Role();
+        newRole.setName("USER");
+        return roleRepository.save(newRole); // Save the newRole and return the managed entity
+      });
+
+      // Create a new user with the provided details
+      User user = new User();
+      user.setUserName(registerDto.getUserName());
+      user.setUserPassword(
+          passwordEncoder.encode(registerDto.getUserPassword()));
+      user.setUserEmail(registerDto.getUserEmail());
+
+      // Associate the user with the role
       user.setRoles(Collections.singletonList(role));
-    } else {
-      return new ResponseEntity<>("Role not found!", HttpStatus.BAD_REQUEST);
+
+      // Save the user entity, which will also save the associated role
+      userRepository.save(user);
+
+      return ResponseEntity.ok("User registered successfully!");
+    } catch (Exception e) {
+      // Handle specific exceptions if necessary
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to register user: " + e.getMessage());
     }
-    userRepository.save(user);
-    return new ResponseEntity<>("User registered success!", HttpStatus.OK);
   }
 
   @PostMapping("/login")

@@ -10,6 +10,7 @@ import com.example.demofakecloud.entity.User;
 import com.example.demofakecloud.entity.Impl.CustomUserDetails;
 import com.example.demofakecloud.repository.UserRepository;
 import com.example.demofakecloud.utils.JWTGenerator;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 

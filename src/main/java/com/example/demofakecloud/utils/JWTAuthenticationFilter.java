@@ -4,12 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import com.example.demofakecloud.entity.Impl.CustomUserDetails;
 import com.example.demofakecloud.service.AuthenticationService;
 // import com.example.demofakecloud.service.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -20,14 +22,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Order(Ordered.HIGHEST_PRECEDENCE)
+//@Order(Ordered.HIGHEST_PRECEDENCE)
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
   private JWTGenerator tokenGenerator;
@@ -39,6 +41,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
       HttpServletResponse response, //
       FilterChain filterChain)//
       throws ServletException, IOException {
+    String requestUri = request.getRequestURI();
+    // Check if the request URI matches any allowed endpoint without a token
+    if (isEndpointAllowedWithoutToken(request)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
     String token = getJWTFromRequest(request);
     if (StringUtils.hasText(token) && tokenGenerator.validateTokens(token)) {
       String username = tokenGenerator.getUsernameFromToken(token);
@@ -46,7 +54,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
       UserDetails userDetails =
           customUserDetailsService.loadUserByUsername(username);
       if (userDetails != null) {
-        log.info("User authenticated in Filter: {}", userDetails.getUsername());
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(userDetails, null,
                 userDetails.getAuthorities());
@@ -54,25 +61,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext()
             .setAuthentication(authenticationToken);
-        log.info("UsernamePasswordAuthenticationToken: {}",
-            authenticationToken);
-
-        // Proceed with the request after authentication
-        filterChain.doFilter(request, response);
-        log.info("Proceed with the request after authentication");
-      } else {
-        log.warn("User details not found for username: {}", username);
-        // Handle unauthorized access
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       }
-    } else {
-      log.warn("Invalid or expired token");
-      // Handle unauthorized access
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      filterChain.doFilter(request, response);
+
     }
+
   }
-
-
 
   // @Override
   // protected void doFilterInternal(HttpServletRequest req,
@@ -120,6 +114,16 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
       return bearerToken.substring(7, bearerToken.length());
     }
     return null;
+  }
+
+  private boolean isEndpointAllowedWithoutToken(HttpServletRequest request) {
+    String requestUri = request.getRequestURI();
+    // List of endpoints that don't require a token
+    List<String> allowedEndpoints = Arrays.asList("/api/auth/register",
+        "/api/auth/login", "/public-endpoint");
+
+    // Check if the request URI matches any allowed endpoint
+    return allowedEndpoints.contains(requestUri);
   }
 
 }

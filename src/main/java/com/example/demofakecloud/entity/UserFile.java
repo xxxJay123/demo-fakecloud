@@ -1,5 +1,6 @@
 package com.example.demofakecloud.entity;
 
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.*;
@@ -13,6 +14,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "user_files")
 public class UserFile {
 
   @Id
@@ -23,9 +25,9 @@ public class UserFile {
   private String fileType;
 
   @Lob
-  private byte[] data;
-
+  private Blob data;
+  
   @ManyToOne
-  @JoinColumn(name = "user_id")  
+  @JoinColumn(name = "user_id")
   private User user;
 }

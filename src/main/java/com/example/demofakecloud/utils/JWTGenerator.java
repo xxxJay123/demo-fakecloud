@@ -12,9 +12,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.crypto.spec.SecretKeySpec;
 
 @Component
@@ -45,6 +51,7 @@ public class JWTGenerator {
                 .setClaims(claims)//
                 .setSubject(username)//
                 .setIssuedAt(createdDate)//
+                
                 .setExpiration(expirationDate)//
                 .signWith(secretKey, SignatureAlgorithm.HS256) // Sign the token with the injected secretKey
                 .compact();//
@@ -88,5 +95,6 @@ public class JWTGenerator {
     private Date calculateExpirationDate(Date createdDate) {
         return new Date(createdDate.getTime() + expiration);
     }
+
 
 }
