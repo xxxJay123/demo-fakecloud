@@ -49,7 +49,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     }
     String token = getJWTFromRequest(request);
     if (StringUtils.hasText(token) && tokenGenerator.validateTokens(token)
-        && tokenGenerator.isTokenBlacklisted(token)) {
+       ) {
       String username = tokenGenerator.getUsernameFromToken(token);
 
       UserDetails userDetails =
@@ -109,7 +109,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
   // }
   // chain.doFilter(req, res);
   // }
-  public String getJWTFromRequest(HttpServletRequest request) {
+  private String getJWTFromRequest(HttpServletRequest request) {
     String bearerToken = request.getHeader("Authorization");
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
       return bearerToken.substring(7, bearerToken.length());

@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,8 +53,7 @@ public class AuthController {
   private PasswordEncoder passwordEncoder;
   @Autowired
   private JWTGenerator jwtGenerator;
-  @Autowired
-  private JWTAuthenticationFilter jwtFiler;
+
 
 
   @PostMapping("/register")
@@ -131,7 +131,7 @@ public class AuthController {
   public ResponseEntity<String> logout(HttpServletRequest request,
       HttpServletResponse response) {
     try {
-      String token = jwtFiler.getJWTFromRequest(request);
+      String token = getJWTFromRequest(request);
       jwtGenerator.addToBlacklist(token);
       return ResponseEntity.ok("Logged out successfully!");
     } catch (Exception e) {
@@ -139,6 +139,7 @@ public class AuthController {
           .body("Failed to log out: " + e.getMessage());
     }
   }
+
   // @PostMapping("/login")
   // public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO loginDto) {
   // log.info("Attempting login for user: {}", loginDto.getUserName());
@@ -157,4 +158,11 @@ public class AuthController {
   // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
   // }
   // }
+  private String getJWTFromRequest(HttpServletRequest request) {
+    String bearerToken = request.getHeader("Authorization");
+    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+      return bearerToken.substring(7, bearerToken.length());
+    }
+    return null;
+  }
 }

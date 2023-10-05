@@ -60,6 +60,10 @@ public class JWTGenerator {
 
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
+        if (isTokenBlacklisted(token)) {
+            return false;
+        }
+
         return (username.equals(userDetails.getUsername())
                 && !isTokenExpired(token));
     }
