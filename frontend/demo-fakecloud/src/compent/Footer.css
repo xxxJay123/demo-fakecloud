@@ -1,0 +1,16 @@
+footer {
+  background-color: #512da8; /* Matching the main theme's header color */
+  color: white;
+  padding: 10px;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  position: fixed; /* Fixed position to stay at the bottom */
+}
+
+p {
+  margin: 0;
+  font-size: 12px; /* Adjusted font size to match the main theme */
+}
+

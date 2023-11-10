@@ -1,7 +1,6 @@
 package com.example.demofakecloud.entity.Impl;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

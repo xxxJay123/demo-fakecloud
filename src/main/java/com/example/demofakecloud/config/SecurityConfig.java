@@ -41,6 +41,8 @@ public class SecurityConfig {
   // private CustomUserDetailsService customUserDetailsService;
   @Autowired
   private AuthenticationService authenticationService;
+  
+
 
 
 
@@ -66,9 +68,11 @@ public class SecurityConfig {
   @Bean 
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http//
+        .cors(withDefaults())
         .csrf(csrf -> csrf//
             .disable()//
-        )//
+        )
+        .cors(withDefaults())//
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)//
         )//
