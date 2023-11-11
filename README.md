@@ -1,6 +1,46 @@
 # Introduction to "demo-fakecloud"
 The "demo-fakecloud" project is a comprehensive demonstration of a cloud storage application, showcasing both frontend and backend components. Developed with React.js on the frontend and Java for the backend, this project highlights key features such as user authentication, file uploading, and security measures.
 
+## Installation:
+1. git clone
+```bash
+git clone git@github.com:xxxJay123/demo-fakecloud.git
+```
+2. run backend server:
+```bash
+cd demo-fakecloud
+mvn spring-boot:run
+```
+3. run React.js:
+```bash
+cd frontend/demo-fakecloud
+npm start
+```
+4. have fun!~
+****
+## Development Environment:
+
+### Backend (Spring Boot):
+1. Java Version:
+    - Java version is set to 17 in the <java.version> property.
+2. Spring Boot:
+    - The project uses Spring Boot with a parent dependency on spring-boot-starter-parent version 3.1.4.
+3. Dependencies:  
+    - Key dependencies include:
+      - spring-boot-starter-web
+      - spring-security (version 6.1.4)
+      - jedis (version 5.0.1)
+      - jakarta.validation-api (version 3.0.2)
+      - spring-boot-starter-data-jpa
+      - postgresql (version 42.6.0)
+      - jjwt-api, jjwt-impl, jjwt-jackson (version 0.11.5)
+4. Build:
+    - Maven build tool is used.
+    - The `spring-boot-maven-plugin` is configured in the build section.
+
+### Frontend  (React.js)
+
+*****
 ## Frontend Code:
 ![Frontend Interface](./images/login.gif)
 ![Frontend Interface](./images/fronent1.png)
