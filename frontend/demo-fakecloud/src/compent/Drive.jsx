@@ -35,7 +35,10 @@ const Drive = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    if (!image) {
+      setError("Please select the file");
+      return;
+    }
     try {
       // Get the file input element
       const fileInput = document.querySelector(".input-field");
