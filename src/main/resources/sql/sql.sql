@@ -9,4 +9,7 @@ select * from role;
 select * from users;
 select * from user_files;
 
+DELETE FROM users;
+
+
 SELECT * FROM roles WHERE name ILIKE 'user';

@@ -2,15 +2,12 @@ package com.example.demofakecloud.controller;
 
 import java.util.Collections;
 import java.util.Optional;
-import javax.management.relation.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,13 +22,9 @@ import com.example.demofakecloud.model.dto.LoginDTO;
 import com.example.demofakecloud.model.dto.RegisterDTO;
 import com.example.demofakecloud.repository.RoleRepository;
 import com.example.demofakecloud.repository.UserRepository;
-import com.example.demofakecloud.service.UserService;
-import com.example.demofakecloud.utils.JWTAuthenticationFilter;
 import com.example.demofakecloud.utils.JWTGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.AuthenticationException;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,8 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
   @Autowired
   private AuthenticationManager authenticationManager;
-  @Autowired
-  private UserService userService;
   @Autowired
   private UserRepository userRepository;
   @Autowired

@@ -1,10 +1,8 @@
 package com.example.demofakecloud.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 public class WebMvcConfig implements WebMvcConfigurer {
 
-  private final String allowedOrigins = "http://localhost:3000";
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {

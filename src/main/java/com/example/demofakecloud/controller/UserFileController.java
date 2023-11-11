@@ -1,33 +1,20 @@
 package com.example.demofakecloud.controller;
 
-import java.io.IOException;
 import java.sql.Blob;
-import java.util.List;
-import java.util.Optional;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.demofakecloud.config.BlobConverter;
 import com.example.demofakecloud.entity.User;
-import com.example.demofakecloud.entity.UserFile;
 import com.example.demofakecloud.entity.Impl.CustomUserDetails;
-import com.example.demofakecloud.model.dto.LoginDTO;
 import com.example.demofakecloud.repository.UserRepository;
-import com.example.demofakecloud.service.AuthenticationService;
 import com.example.demofakecloud.service.UserFileService;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 
 @Controller
 @RequestMapping("/api/files")
@@ -41,8 +28,7 @@ public class UserFileController {
     private final UserRepository userRepository;
     @Autowired
     private final BlobConverter blobConverter;
-    @Autowired
-    private final AuthenticationService customUserDetailsService;
+
 
     @GetMapping("/test")
     public ResponseEntity<?> test() {

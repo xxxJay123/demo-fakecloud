@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.example.demofakecloud.customValidation.IsPasswordsMatching;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,8 +31,16 @@ public class User implements UserDetails {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @NotBlank
+  @Column(nullable = false)
   private String userName;
+
+  @NotBlank
+  @Column(nullable = false)
   private String userPassword;
+
+  @NotBlank
+  @Column(nullable = false)
   private String userEmail;
 
   @ManyToMany(mappedBy = "users", cascade = CascadeType.ALL,
